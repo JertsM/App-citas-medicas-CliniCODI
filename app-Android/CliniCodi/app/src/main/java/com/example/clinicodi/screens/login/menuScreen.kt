@@ -1,6 +1,8 @@
 package com.example.clinicodi.screens.login
 
+import android.annotation.SuppressLint
 import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,6 +20,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.clinicodi.R
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -140,10 +144,11 @@ fun menuScreen(navController: NavController) {
 
                     "Calendario" -> {
                         // Forzamos el idioma a español para el DatePicker
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
-                            Locale.setDefault(Locale.of("es", "ES"))
-                        }
+                        Locale.setDefault(Locale("es", "ES"))
                         val calendario = rememberDatePickerState()
+                        val diaSeleccionado = calendario.selectedDateMillis?.let {
+                            SimpleDateFormat("dd/MM/yyyy", Locale("es", "ES")).format(Date(it))
+                        }
                         var horaSeleccionada by remember { mutableStateOf<String?>(null) }
                         val scrollState = rememberScrollState()
 
@@ -248,6 +253,10 @@ fun menuScreen(navController: NavController) {
                                             style = MaterialTheme.typography.titleSmall,
                                             color = Color.Black,
                                             fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            text = "Fecha: $diaSeleccionado",
+                                            color = Color.DarkGray
                                         )
                                         Text(
                                             text = "Hora: $horaSeleccionada",

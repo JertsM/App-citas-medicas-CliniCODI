@@ -10,8 +10,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import com.example.clinicodi.R
 import androidx.compose.material3.Text
@@ -28,6 +33,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -53,6 +60,8 @@ fun inicioSesionScreen (navController: NavController) {
 
     val colorCuadrosTexto2 = Color(R.color.azul_muy_claro)
 
+    var passwordVisible by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -61,14 +70,14 @@ fun inicioSesionScreen (navController: NavController) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-           text = "CliniCodi",
+            text = "CliniCodi",
             fontSize = 75.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = fuenteClinicodi,
             color = colorResource(R.color.azul_claro)
         )
 
-        Spacer (modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Text(
             text = "Inicio de sesión",
@@ -76,12 +85,12 @@ fun inicioSesionScreen (navController: NavController) {
             color = Color.Gray
         )
 
-        Spacer (modifier = Modifier.height(50.dp))
+        Spacer(modifier = Modifier.height(50.dp))
 
         OutlinedTextField(
             value = introducirCorreo,
-            onValueChange = { introducirCorreo = it},
-            label = { Text ("Email") },
+            onValueChange = { introducirCorreo = it },
+            label = { Text("Email") },
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = colorResource(R.color.azul_muy_claro),
                 focusedIndicatorColor = colorCuadrosTexto2,
@@ -89,17 +98,39 @@ fun inicioSesionScreen (navController: NavController) {
             )
         )
 
-        Spacer (modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(15.dp))
 
         OutlinedTextField(
             value = introducirPass,
-            onValueChange = {introducirPass = it},
-            label = {Text("Contraseña")},
+            onValueChange = { introducirPass = it },
+            label = { Text("Contraseña") },
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = colorResource(R.color.azul_muy_claro),
                 focusedIndicatorColor = colorCuadrosTexto2,
                 focusedContainerColor = Color.White
-            )
+            ),
+            visualTransformation =
+                if (passwordVisible)
+                    VisualTransformation.None
+                else
+                    PasswordVisualTransformation(),
+
+            trailingIcon = {
+                IconButton(
+                    onClick = {
+                        passwordVisible = !passwordVisible
+                    }
+                ) {
+                    Icon(
+                        imageVector =
+                            if (passwordVisible)
+                                Icons.Default.Visibility
+                            else
+                                Icons.Default.VisibilityOff,
+                        contentDescription = null
+                    )
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(40.dp))
@@ -115,10 +146,15 @@ fun inicioSesionScreen (navController: NavController) {
                         if (response.isSuccessful) {
                             navController.navigate("menu")
                         } else {
-                            Toast.makeText(context, "Error. Credenciales incorrectas", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                "Error. Credenciales incorrectas",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     } catch (e: Exception) {
-                        Toast.makeText(context, "Exception: ${e.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Exception: ${e.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 }
             },
