@@ -11,9 +11,9 @@ import java.util.Optional;
 
 public interface CitaRepository extends JpaRepository<Cita, Integer> {
 
-    boolean existsByFecha_Hora_Estado(LocalDate fecha, LocalTime hora, EstadoCita estado);
+    boolean existsByFechaAndHoraAndEstado(LocalDate fecha, LocalTime hora, EstadoCita estado);
 
-    Optional<Cita> findByUsuario_Id_Estado(Long idUsuario, EstadoCita estado);
+    Optional<Cita> findByUsuario_IdAndEstado(Long idUsuario, EstadoCita estado);
 
     List<Cita> findByUsuario_Id(Long idUsuario);
 }

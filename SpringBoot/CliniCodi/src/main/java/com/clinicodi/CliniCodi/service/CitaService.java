@@ -21,7 +21,7 @@ public class CitaService {
     private UserRepository usuarioRepository;
 
     public Cita crearCita(CrearCitaRequest request) {
-        boolean ocupada = citaRepository.existsByFecha_Hora_Estado(
+        boolean ocupada = citaRepository.existsByFechaAndHoraAndEstado(
                 request.getFecha(),
                 request.getHora(),
                 EstadoCita.ACTIVA
@@ -34,7 +34,7 @@ public class CitaService {
         Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        Optional<Cita> citaActiva = citaRepository.findByUsuario_Id_Estado(request.getIdUsuario(), EstadoCita.ACTIVA);
+        Optional<Cita> citaActiva = citaRepository.findByUsuario_IdAndEstado(request.getIdUsuario(), EstadoCita.ACTIVA);
 
         if (citaActiva.isPresent()) {
             throw new RuntimeException("El usuario ya tiene una cita activa");
