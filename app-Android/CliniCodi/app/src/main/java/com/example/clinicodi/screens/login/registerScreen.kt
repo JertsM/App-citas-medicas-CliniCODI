@@ -37,9 +37,7 @@ import androidx.navigation.NavController
 import com.example.clinicodi.ApiService.RetrofitClient
 import com.example.clinicodi.Dataclass.RegisterRequest
 import com.example.clinicodi.R
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -53,8 +51,7 @@ fun registerScreen (navController: NavController) {
     var introducirPass by remember { mutableStateOf("") }
     var confirmarPass by remember { mutableStateOf("") }
 
-    val colorCuadrosTexto = Color(R.color.azul_claro)
-    val colorCuadrosTexto2 = Color(R.color.azul_muy_claro)
+    val colorCuadrosTexto2 = colorResource(R.color.azul_muy_claro)
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -190,19 +187,21 @@ fun registerScreen (navController: NavController) {
 
             val request = RegisterRequest(introducirNombre, introducirEmail,introducirPass)
 
-                scope.launch {
+            scope.launch {
                 try {
                     val response = RetrofitClient.api.registrar(request)
-                        if(response.isSuccessful) {
-                            Toast.makeText(context, "Usuario registrado", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(context, "Error de registro. El usuario ya existe.", Toast.LENGTH_SHORT).show()
-                        }
+                    if (response.isSuccessful) {
+                        Toast.makeText(context, "Usuario registrado", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(
+                            context,
+                            "Error de registro. El usuario ya existe.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
 
                 } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
+                    Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         },

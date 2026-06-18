@@ -1,7 +1,8 @@
 package com.example.clinicodi.ApiService
 
-import com.example.clinicodi.Dataclass.ApiResponse
+import com.example.clinicodi.Dataclass.CitaRequest
 import com.example.clinicodi.Dataclass.LoginRequest
+import com.example.clinicodi.Dataclass.LoginResponse
 import com.example.clinicodi.Dataclass.RegisterRequest
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -18,5 +19,10 @@ interface ApiService {
     @POST("auth/login")
     suspend fun login(
         @Body request: LoginRequest
-    ): Response<ApiResponse>
+    ): Response<LoginResponse>
+
+    @POST("citas/crear")
+    suspend fun crearCita(
+        @Body citaRequest: CitaRequest
+    ): Response<ResponseBody>
 }

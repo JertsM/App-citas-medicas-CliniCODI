@@ -1,7 +1,7 @@
 package com.example.clinicodi.screens.login
 
 import android.annotation.SuppressLint
-import android.view.PixelCopy.request
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -40,11 +40,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.clinicodi.ApiService.RetrofitClient
 import com.example.clinicodi.Dataclass.LoginRequest
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "ResourceAsColor")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "ResourceAsColor", "UseKtx")
 @Composable
 fun inicioSesionScreen (navController: NavController) {
 
@@ -58,7 +56,7 @@ fun inicioSesionScreen (navController: NavController) {
         password = introducirPass
     )
 
-    val colorCuadrosTexto2 = Color(R.color.azul_muy_claro)
+    val colorCuadrosTexto2 = colorResource(R.color.azul_muy_claro)
 
     var passwordVisible by remember { mutableStateOf(false) }
 
@@ -140,11 +138,26 @@ fun inicioSesionScreen (navController: NavController) {
 
                 scope.launch {
                     try {
-                        val response = withContext(Dispatchers.IO) {
-                            RetrofitClient.api.login(request)
-                        }
+                        val response = RetrofitClient.api.login(request)
+
                         if (response.isSuccessful) {
-                            navController.navigate("menu")
+                            val usuario = response.body()
+
+                            if (usuario != null) {
+
+                                val sharedPreferences = context.getSharedPreferences(
+                                    "usuario",
+                                    Context.MODE_PRIVATE
+                                )
+
+                                sharedPreferences.edit()
+                                    .putLong("idUsuario", usuario.id)
+                                    .putString("email", usuario.email)
+                                    .putString("nombreUsuario", usuario.nombreUsuario)
+                                    .apply()
+
+                                navController.navigate("menu")
+                            }
                         } else {
                             Toast.makeText(
                                 context,

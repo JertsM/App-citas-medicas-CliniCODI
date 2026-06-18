@@ -1,8 +1,6 @@
 package com.example.clinicodi.screens.login
 
-import android.annotation.SuppressLint
-import android.os.Build
-import androidx.annotation.RequiresApi
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,16 +11,25 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.clinicodi.ApiService.RetrofitClient.api
+import com.example.clinicodi.Dataclass.CitaRequest
 import com.example.clinicodi.R
+import com.example.clinicodi.screens.login.sideBar.avisosScreen
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
+fun convertirFecha(fecha: String): String {
+    val partes = fecha.split("/")
+    return "${partes[2]}-${partes[1]}-${partes[0]}"
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,6 +37,7 @@ fun menuScreen(navController: NavController) {
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     var selectedOption by remember {
         mutableStateOf("Inicio")
@@ -80,8 +88,14 @@ fun menuScreen(navController: NavController) {
                     scope.launch { drawerState.close() }
                 }
                 DrawerItem("Cerrar sesión") {
-                    selectedOption = "Cerrar sesión"
-                    scope.launch { drawerState.close() }
+                    scope.launch {
+                        drawerState.close()
+                        navController.navigate("login") {
+                            popUpTo(0) {
+                                inclusive = true
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -143,8 +157,9 @@ fun menuScreen(navController: NavController) {
                     }
 
                     "Calendario" -> {
-                        // Forzamos el idioma a español para el DatePicker
-                        Locale.setDefault(Locale("es", "ES"))
+                        LaunchedEffect(Unit) {
+                            Locale.setDefault(Locale("es", "ES"))
+                        }
                         val calendario = rememberDatePickerState()
                         val diaSeleccionado = calendario.selectedDateMillis?.let {
                             SimpleDateFormat("dd/MM/yyyy", Locale("es", "ES")).format(Date(it))
@@ -203,7 +218,6 @@ fun menuScreen(navController: NavController) {
 
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            // Usamos FlowRow para que las horas se organicen en varias columnas
                             FlowRow(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -267,13 +281,39 @@ fun menuScreen(navController: NavController) {
 
                                         Button(
                                             onClick = {
-                                                // Aquí irá la llamada al backend
-                                            },
-                                            modifier = Modifier.fillMaxWidth(),
-                                            shape = RoundedCornerShape(14.dp),
-                                            colors = ButtonDefaults.buttonColors(
-                                                containerColor = colorResource(R.color.azul_claro)
-                                            )
+                                                val cita = CitaRequest(
+                                                    emailUsuario = "prueba@gmail.com",
+                                                    fecha = convertirFecha(diaSeleccionado.toString()),
+                                                    hora = horaSeleccionada.toString()
+                                                )
+
+                                                scope.launch {
+                                                    try {
+                                                        val response = api.crearCita(cita)
+
+                                                        if (response.isSuccessful) {
+                                                            Toast.makeText(
+                                                                context,
+                                                                "Cita confirmada correctamente",
+                                                                Toast.LENGTH_SHORT
+                                                            ).show()
+                                                        } else {
+                                                            Toast.makeText(
+                                                                context,
+                                                                "Ya tienes una cita pendiente",
+                                                                Toast.LENGTH_SHORT
+                                                            ).show()
+                                                        }
+
+                                                    } catch (e: Exception) {
+                                                        Toast.makeText(
+                                                            context,
+                                                            "Error de conexión: ${e.message}",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                    }
+                                                }
+                                            }
                                         ) {
                                             Text("Confirmar cita")
                                         }
@@ -284,12 +324,10 @@ fun menuScreen(navController: NavController) {
                     }
 
                     "Mis citas" -> {
-                        Text("Pantalla de citas")
+                        Text("Pantalla de Mis Citas")
                     }
 
-                    "Avisos" -> {
-                        Text("Pantalla de Avisos")
-                    }
+                    "Avisos" -> avisosScreen()
 
                     "Acerca de" -> {
 
@@ -323,14 +361,6 @@ fun menuScreen(navController: NavController) {
 
                     "Perfil" -> {
                         Text("Pantalla de Perfil")
-                    }
-
-                    "Cerrar sesión" -> {
-                        navController.navigate("login") {
-                            popUpTo(0) {
-                                inclusive = true
-                            }
-                        }
                     }
                 }
             }

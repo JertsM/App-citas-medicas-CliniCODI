@@ -1,6 +1,6 @@
 package com.clinicodi.CliniCodi.service;
 
-import com.clinicodi.CliniCodi.dto.CrearCitaRequest;
+import com.clinicodi.CliniCodi.dto.CitaRequest;
 import com.clinicodi.CliniCodi.entidades.Cita;
 import com.clinicodi.CliniCodi.entidades.EstadoCita;
 import com.clinicodi.CliniCodi.entidades.Usuario;
@@ -20,34 +20,40 @@ public class CitaService {
     @Autowired
     private UserRepository usuarioRepository;
 
-    public Cita crearCita(CrearCitaRequest request) {
-        boolean ocupada = citaRepository.existsByFechaAndHoraAndEstado(
-                request.getFecha(),
-                request.getHora(),
-                EstadoCita.ACTIVA
-        );
+        public void crearCita(CitaRequest request) {
 
-        if (ocupada) {
-            throw new RuntimeException("La hora seleccionada no está disponible");
+            Usuario usuario = usuarioRepository
+                    .findByEmail(request.getEmailUsuario())
+                    .orElseThrow(() ->
+                            new RuntimeException("Usuario no encontrado"));
+
+            boolean citaOcupada = citaRepository.existsByFechaAndHoraAndEstado(
+                    request.getFecha(),
+                    request.getHora(),
+                    EstadoCita.PENDIENTE
+            );
+
+            if (citaOcupada) {
+                throw new RuntimeException("Ya existe una cita para esa fecha y hora");
+            }
+
+            Optional<Cita> citaUsuario = citaRepository.findByUsuario_EmailAndEstado(
+                    request.getEmailUsuario(),
+                    EstadoCita.PENDIENTE
+            );
+
+            if (citaUsuario.isPresent()) {
+                throw new RuntimeException("Ya tienes una cita pendiente");
+            }
+
+            Cita cita = new Cita();
+
+            cita.setUsuario(usuario);
+            cita.setFecha(request.getFecha());
+            cita.setHora(request.getHora());
+            cita.setEstado(EstadoCita.PENDIENTE);
+
+            citaRepository.save(cita);
         }
-
-        Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        Optional<Cita> citaActiva = citaRepository.findByUsuario_IdAndEstado(request.getIdUsuario(), EstadoCita.ACTIVA);
-
-        if (citaActiva.isPresent()) {
-            throw new RuntimeException("El usuario ya tiene una cita activa");
-        }
-
-        Cita cita = new Cita();
-        cita.setFecha(request.getFecha());
-        cita.setHora(request.getHora());
-        cita.setEstado(EstadoCita.ACTIVA);
-        cita.setUsuario(usuario);
-
-        return citaRepository.save(cita);
-
-    }
 
 }

@@ -93,7 +93,6 @@ fun loginScreen(navController: NavController) {
 
         OutlinedButton(
             onClick = {
-                // 1. Crear request con datos del formulario
                 val request = RegisterRequest(
                     nombreUsuario = nombreUsuario,
                     email = email,

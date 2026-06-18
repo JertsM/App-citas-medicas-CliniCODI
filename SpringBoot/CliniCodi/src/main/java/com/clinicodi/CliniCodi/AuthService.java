@@ -1,6 +1,7 @@
 package com.clinicodi.CliniCodi;
 
 import com.clinicodi.CliniCodi.dto.LoginRequest;
+import com.clinicodi.CliniCodi.dto.LoginResponse;
 import com.clinicodi.CliniCodi.dto.RegisterRequest;
 import com.clinicodi.CliniCodi.entidades.Usuario;
 import com.clinicodi.CliniCodi.repository.UserRepository;
@@ -14,7 +15,6 @@ public class AuthService {
 
     @Autowired
     public UserRepository userRepository;
-    Usuario usuario = new Usuario();
 
 
     public void registrar(RegisterRequest request) {
@@ -23,6 +23,7 @@ public class AuthService {
             throw new RuntimeException("El email ya existe");
         }
 
+        Usuario usuario = new Usuario();
         usuario.setNombreUsuario(request.getNombreUsuario());
         usuario.setEmail(request.getEmail());
 
@@ -30,7 +31,7 @@ public class AuthService {
         userRepository.save(usuario);
     }
 
-    public Usuario login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request) {
 
         Usuario usuario = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() ->
@@ -50,6 +51,10 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Contraseña incorrecta");
         }
 
-        return usuario;
+        return new LoginResponse(
+                usuario.getId(),
+                usuario.getEmail(),
+                usuario.getNombreUsuario()
+        );
     }
 }
