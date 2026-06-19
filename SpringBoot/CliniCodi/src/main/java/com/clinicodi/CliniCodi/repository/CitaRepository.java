@@ -18,4 +18,21 @@ public interface CitaRepository extends JpaRepository<Cita, Integer> {
     Optional<Cita> findByUsuario_EmailAndEstado(String email, EstadoCita estado);
 
     List<Cita> findByUsuario_Id(Long idUsuario);
+
+    Optional<Cita> findByIdCitaAndUsuario_Email(
+            Integer idCita,
+            String email
+    );
+
+    List<Cita> findAllByUsuario_EmailAndEstado(
+            String email,
+            EstadoCita estado
+    );
+
+    Optional<Cita> findByFechaAndHoraAndEstado(
+            LocalDate fecha,
+            LocalTime hora,
+            EstadoCita estado
+    );
+
 }
